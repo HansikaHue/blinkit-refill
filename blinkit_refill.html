@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blinkit Refill — Feature Concept</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --blinkit-green: #1CA672;
+    --blinkit-green-dark: #158a5e;
+    --blinkit-green-light: #e8f7f2;
+    --blinkit-yellow: #F8C136;
+    --blinkit-bg: #f4f4f4;
+    --blinkit-text: #1a1a1a;
+    --blinkit-subtext: #666;
+    --blinkit-border: #e8e8e8;
+    --blinkit-red: #e63946;
+    --blinkit-card: #ffffff;
+  }
+
+  body {
+    background: #0f0f0f;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+    color: white;
+  }
+
+  .page-header h1 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #1CA672;
+    margin-bottom: 6px;
+  }
+
+  .page-header p {
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 1px;
+  }
+
+  .phone-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .phone-frame {
+    width: 340px;
+    height: 680px;
+    background: #1a1a1a;
+    border-radius: 44px;
+    padding: 10px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px #333, inset 0 0 0 1px #2a2a2a;
+    position: relative;
+  }
+
+  .phone-notch {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 28px;
+    background: #1a1a1a;
+    border-radius: 0 0 18px 18px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .notch-camera {
+    width: 10px;
+    height: 10px;
+    background: #2a2a2a;
+    border-radius: 50%;
+    border: 1.5px solid #333;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #f4f4f4;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* SCREENS */
+  .screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: white;
+    padding: 36px 20px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a1a1a;
+    flex-shrink: 0;
+  }
+
+  .status-time { font-weight: 700; font-size: 12px; }
+  .status-icons { display: flex; gap: 4px; align-items: center; font-size: 10px; }
+
+  /* TOP BAR */
+  .top-bar {
+    background: white;
+    padding: 8px 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .top-bar-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .blinkit-logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1CA672;
+    letter-spacing: -0.5px;
+  }
+
+  .delivery-badge {
+    background: #1CA672;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .cart-icon {
+    width: 32px;
+    height: 32px;
+    background: #f4f4f4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 14px; height: 14px;
+    background: #1CA672;
+    border-radius: 50%;
+    font-size: 8px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .location-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .location-pin { color: #1CA672; font-size: 12px; }
+  .location-arrow { color: #1CA672; font-size: 9px; margin-left: 2px; }
+
+  /* SEARCH BAR */
+  .search-bar {
+    background: white;
+    padding: 8px 16px 12px;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    background: #f4f4f4;
+    border-radius: 10px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #999;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: white;
+    display: flex;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .nav-tab {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .nav-tab.active {
+    color: #1CA672;
+    border-bottom-color: #1CA672;
+  }
+
+  .nav-tab .tab-icon { font-size: 14px; display: block; margin-bottom: 2px; }
+
+  /* SCROLL CONTENT */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* HERO BANNER */
+  .hero-banner {
+    margin: 12px;
+    background: linear-gradient(135deg, #1CA672, #0d8a56);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .hero-banner:active { transform: scale(0.98); }
+
+  .hero-banner::after {
+    content: '';
+    position: absolute;
+    right: -10px; top: -20px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    right: 20px; bottom: -15px;
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .hero-tag {
+    background: rgba(255,255,255,0.2);
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .hero-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+
+  .hero-sub {
+    font-size: 10px;
+    opacity: 0.85;
+    margin-bottom: 10px;
+  }
+
+  .hero-cta {
+    background: white;
+    color: #1CA672;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .hero-emoji {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 36px;
+    z-index: 2;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    padding: 12px 16px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .section-link {
+    font-size: 10px;
+    color: #1CA672;
+    font-weight: 600;
+  }
+
+  /* CATEGORY ROW */
+  .category-row {
+    display: flex;
+    gap: 10px;
+    padding: 6px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-row::-webkit-scrollbar { display: none; }
+
+  .category-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .category-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .category-name {
+    font-size: 9px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    max-width: 52px;
+    line-height: 1.2;
+  }
+
+  /* PRODUCT CARD */
+  .product-row {
+    display: flex;
+    gap: 10px;
+    padding: 4px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .product-row::-webkit-scrollbar { display: none; }
+
+  .product-card {
+    flex-shrink: 0;
+    width: 110px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .product-img {
+    background: #f8f8f8;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    position: relative;
+  }
+
+  .product-discount {
+    position: absolute;
+    top: 5px; left: 5px;
+    background: #e63946;
+    color: white;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  .product-info {
+    padding: 8px 8px 6px;
+  }
+
+  .product-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .product-weight { font-size: 9px; color: #999; margin-bottom: 6px; }
+
+  .product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .product-price { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+  .product-mrp { font-size: 9px; color: #999; text-decoration: line-through; }
+
+  .add-btn {
+    background: white;
+    border: 1.5px solid #1CA672;
+    color: #1CA672;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  /* ===== REFILL SCREEN ===== */
+  .refill-header {
+    background: linear-gradient(160deg, #0d2e1e, #1a1a1a);
+    padding: 36px 16px 20px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .refill-back {
+    font-size: 18px;
+    color: white;
+    margin-bottom: 12px;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .refill-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .refill-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .refill-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .refill-stat {
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .refill-stat-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1CA672;
+  }
+
+  .refill-stat-label {
+    font-size: 8px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+
+  /* REFILL ITEM */
+  .refill-item {
+    background: white;
+    margin: 8px 12px 0;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .refill-item:active { transform: scale(0.98); }
+
+  .refill-item-img {
+    width: 50px;
+    height: 50px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .refill-item-info { flex: 1; }
+
+  .refill-item-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+  }
+
+  .refill-item-detail {
+    font-size: 10px;
+    color: #999;
+    margin-bottom: 5px;
+  }
+
+  .refill-urgency {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .urgency-red { background: #fff0f0; color: #e63946; }
+  .urgency-orange { background: #fff6e0; color: #f4a522; }
+  .urgency-green { background: #e8f7f2; color: #1CA672; }
+
+  .refill-add {
+    background: #1CA672;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .refill-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 14px 16px 4px;
+  }
+
+  /* REFILL ALL BUTTON */
+  .refill-all-btn {
+    margin: 14px 12px 6px;
+    background: #1CA672;
+    color: white;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .refill-all-btn:active { transform: scale(0.98); background: #158a5e; }
+
+  /* ===== NOTIFICATION SCREEN ===== */
+  .notif-screen {
+    background: #f0f0f0;
+  }
+
+  .notif-status-bar {
+    background: #1a1a1a;
+    padding: 36px 20px 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .lock-time {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+  }
+
+  .lock-time-big {
+    font-size: 46px;
+    font-weight: 200;
+    line-height: 1;
+  }
+
+  .lock-date {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  .notif-card {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px 16px 0 0;
+    padding: 16px;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .notif-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .notif-app-icon {
+    width: 32px;
+    height: 32px;
+    background: #1CA672;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .notif-app-name { font-size: 11px; font-weight: 700; color: #333; }
+  .notif-time { font-size: 10px; color: #999; margin-left: auto; }
+
+  .notif-body {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+  }
+
+  .notif-detail {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .notif-items {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .notif-item-chip {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .notif-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .notif-btn-primary {
+    flex: 1;
+    background: #1CA672;
+    color: white;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .notif-btn-secondary {
+    flex: 1;
+    background: #f4f4f4;
+    color: #333;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  /* ===== CHECKOUT SCREEN ===== */
+  .checkout-header {
+    background: white;
+    padding: 36px 16px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .checkout-back-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+
+  .checkout-title { font-size: 16px; font-weight: 800; color: #1a1a1a; }
+  .checkout-sub { font-size: 10px; color: #999; }
+
+  .checkout-item {
+    background: white;
+    margin: 8px 12px 0;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .checkout-item-img {
+    width: 44px; height: 44px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .checkout-item-name { font-size: 11px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .checkout-item-weight { font-size: 10px; color: #999; }
+  .checkout-item-price { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-left: auto; flex-shrink: 0; }
+
+  .qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1CA672;
+    border-radius: 6px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+
+  .qty-btn { color: white; font-size: 14px; cursor: pointer; font-weight: 700; }
+  .qty-num { color: white; font-size: 12px; font-weight: 700; min-width: 12px; text-align: center; }
+
+  .checkout-divider {
+    margin: 10px 12px 0;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .checkout-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #666;
+    padding: 3px 0;
+  }
+
+  .checkout-row.total {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+
+  .checkout-row .savings { color: #1CA672; font-weight: 600; }
+
+  .delivery-row {
+    margin: 8px 12px 0;
+    background: #e8f7f2;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1CA672;
+  }
+
+  .place-order-btn {
+    margin: 10px 12px;
+    background: #1CA672;
+    color: white;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .place-order-btn:active { transform: scale(0.98); background: #158a5e; }
+
+  /* ===== SUCCESS SCREEN ===== */
+  .success-screen {
+    background: white;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .success-circle {
+    width: 90px;
+    height: 90px;
+    background: #e8f7f2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    margin: 0 auto 16px;
+    animation: popIn 0.4s ease;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+
+  .success-sub {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+
+  .success-eta {
+    background: #e8f7f2;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 14px auto;
+    display: inline-block;
+  }
+
+  .success-eta-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1CA672;
+    line-height: 1;
+  }
+
+  .success-eta-label {
+    font-size: 10px;
+    color: #1CA672;
+    font-weight: 600;
+  }
+
+  .success-items {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .success-item {
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .success-item span {
+    display: block;
+    font-size: 9px;
+    color: #999;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .track-btn {
+    background: #1CA672;
+    color: white;
+    border-radius: 12px;
+    padding: 13px 40px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    display: inline-block;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    padding: 8px 0 4px;
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 600;
+    color: #bbb;
+  }
+
+  .bottom-nav-item.active { color: #1CA672; }
+  .bottom-nav-item .nav-icon { font-size: 18px; }
+
+  /* STEP INDICATORS */
+  .step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .step-dot.active {
+    background: #1CA672;
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* LABELS */
+  .screen-label {
+    color: #444;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  /* HOVER HINT */
+  .hint {
+    color: #333;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 8px;
+    opacity: 0.6;
+  }
+
+  .byline {
+    color: #333;
+    font-size: 9px;
+    text-align: center;
+    margin-top: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .byline span { color: #1CA672; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Blinkit Refill — Feature Concept</h1>
+  <p>tap through the screens ↓</p>
+</div>
+
+<div class="phone-wrapper">
+  <div class="phone-frame">
+    <div class="phone-notch">
+      <div class="notch-camera"></div>
+    </div>
+    <div class="phone-screen">
+
+      <!-- SCREEN 1: HOME -->
+      <div class="screen active" id="screen-1">
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <span>▲▲▲</span>
+            <span>WiFi</span>
+            <span>🔋</span>
+          </div>
+        </div>
+        <div class="top-bar">
+          <div class="top-bar-row1">
+            <span class="blinkit-logo">blinkit</span>
+            <div class="delivery-badge">⚡ 10 mins</div>
+            <div class="cart-icon">🛒<div class="cart-badge">2</div></div>
+          </div>
+          <div class="location-row">
+            <span class="location-pin">📍</span>
+            <span>Delivering to <strong>Hauz Khas, Delhi</strong></span>
+            <span class="location-arrow">▾</span>
+          </div>
+        </div>
+        <div class="search-bar">
+          <div class="search-input">🔍 Search for products...</div>
+        </div>
+        <div class="nav-tabs">
+          <div class="nav-tab active"><span class="tab-icon">🏠</span>Home</div>
+          <div class="nav-tab" onclick="goTo(2)"><span class="tab-icon">🔄</span>Refill</div>
+          <div class="nav-tab"><span class="tab-icon">📦</span>Orders</div>
+          <div class="nav-tab"><span class="tab-icon">👤</span>Profile</div>
+        </div>
+        <div class="scroll-content">
+          <!-- REFILL BANNER — main entry point -->
+          <div class="hero-banner" onclick="goTo(2)">
+            <div class="hero-tag">✨ New — Refill</div>
+            <div class="hero-title">Running low on something?</div>
+            <div class="hero-sub">We predicted 3 items. 1-tap reorder.</div>
+            <div class="hero-cta">See my Refills →</div>
+            <div class="hero-emoji">🔄</div>
+          </div>
+
+          <div class="section-header">
+            <span class="section-title">Shop by category</span>
+            <span class="section-link">See all</span>
+          </div>
+          <div class="category-row">
+            <div class="category-item">
+              <div class="category-icon" style="background:#fff8e1">🥛</div>
+              <div class="category-name">Dairy & Eggs</div>
+            </div>
+            <div class="category-item">
+              <div class="category-icon" style="background:#e8f5e9">🥦</div>
+              <div class="category-name">Fruits & Veggies</div>
+            </div>
+            <div class="category-item">
+              <div class="category-icon" style="background:#fce4ec">🍫</div>
+              <div class="category-name">Snacks</div>
+            </div>
+            <div class="category-item">
+              <div class="category-icon" style="background:#e3f2fd">🧴</div>
+              <div class="category-name">Personal Care</div>
+            </div>
+            <div class="category-item">
+              <div class="category-icon" style="background:#f3e5f5">☕</div>
+              <div class="category-name">Beverages</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <span class="section-title">Best sellers</span>
+            <span class="section-link">See all</span>
+          </div>
+          <div class="product-row">
+            <div class="product-card">
+              <div class="product-img">🥛<div class="product-discount">5% OFF</div></div>
+              <div class="product-info">
+                <div class="product-name">Amul Taaza Milk</div>
+                <div class="product-weight">500 ml</div>
+                <div class="product-price-row">
+                  <div>
+                    <div class="product-price">₹28</div>
+                    <div class="product-mrp">₹30</div>
+                  </div>
+                  <div class="add-btn">ADD</div>
+                </div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-img">🥚</div>
+              <div class="product-info">
+                <div class="product-name">Farm Fresh Eggs</div>
+                <div class="product-weight">6 pcs</div>
+                <div class="product-price-row">
+                  <div>
+                    <div class="product-price">₹54</div>
+                  </div>
+                  <div class="add-btn">ADD</div>
+                </div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-img">🫙<div class="product-discount">12% OFF</div></div>
+              <div class="product-info">
+                <div class="product-name">Epigamia Greek Yogurt</div>
+                <div class="product-weight">400 g</div>
+                <div class="product-price-row">
+                  <div>
+                    <div class="product-price">₹79</div>
+                    <div class="product-mrp">₹90</div>
+                  </div>
+                  <div class="add-btn">ADD</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="bottom-nav-item active"><span class="nav-icon">🏠</span>Home</div>
+          <div class="bottom-nav-item" onclick="goTo(2)"><span class="nav-icon">🔄</span>Refill</div>
+          <div class="bottom-nav-item"><span class="nav-icon">📦</span>Orders</div>
+          <div class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: NOTIFICATION (lock screen) -->
+      <div class="screen" id="screen-2">
+        <div style="flex:1; background: linear-gradient(180deg, #0a1628 0%, #1a2a40 100%); position:relative; display:flex; flex-direction:column;">
+          <div style="padding: 36px 20px 10px; display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:white;">
+            <span>9:41</span>
+            <div style="display:flex; gap:4px; font-size:10px;">▲▲▲ WiFi 🔋</div>
+          </div>
+          <div style="text-align:center; padding: 30px 0 20px; color:white;">
+            <div style="font-size: 52px; font-weight: 200; line-height:1; letter-spacing:-2px;">9:41</div>
+            <div style="font-size: 13px; opacity:0.7; margin-top:4px;">Thursday, 1 May</div>
+          </div>
+          <div style="flex:1;"></div>
+          <div class="notif-card">
+            <div class="notif-title-row">
+              <div class="notif-app-icon">⚡</div>
+              <div>
+                <div class="notif-app-name">blinkit</div>
+              </div>
+              <div class="notif-time">now</div>
+            </div>
+            <div class="notif-body">🔄 Refill alert — 3 items running low</div>
+            <div class="notif-detail">You usually reorder oat milk by now. Your protein bars and dish soap are also due. One tap, done.</div>
+            <div class="notif-items">
+              <div class="notif-item-chip">🥛 Oat milk</div>
+              <div class="notif-item-chip">💪 Protein bar</div>
+              <div class="notif-item-chip">🧴 Dish soap</div>
+            </div>
+            <div class="notif-actions">
+              <div class="notif-btn-primary" onclick="goTo(3)">Refill now ⚡</div>
+              <div class="notif-btn-secondary">Later</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: REFILL TAB -->
+      <div class="screen" id="screen-3">
+        <div class="refill-header">
+          <div class="refill-back" onclick="goTo(1)">← </div>
+          <div class="refill-title">🔄 Refill <span style="font-size:13px; background:rgba(28,166,114,0.3); padding:2px 8px; border-radius:20px; font-weight:700;">3 items</span></div>
+          <div class="refill-sub">Based on your order history • Updated today</div>
+          <div class="refill-stats">
+            <div class="refill-stat">
+              <div class="refill-stat-num">23</div>
+              <div class="refill-stat-label">Orders tracked</div>
+            </div>
+            <div class="refill-stat">
+              <div class="refill-stat-num">8</div>
+              <div class="refill-stat-label">Items on Refill</div>
+            </div>
+            <div class="refill-stat">
+              <div class="refill-stat-num">₹0</div>
+              <div class="refill-stat-label">Delivery (Prime)</div>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-content">
+          <div class="refill-section-title">⚠️ Running low now</div>
+          <div class="refill-item" onclick="goTo(4)">
+            <div class="refill-item-img">🥛</div>
+            <div class="refill-item-info">
+              <div class="refill-item-name">Oatly Oat Milk</div>
+              <div class="refill-item-detail">1L · Usually ordered every 9 days</div>
+              <div class="refill-urgency urgency-red">🔴 Likely out today</div>
+            </div>
+            <div class="refill-add">ADD</div>
+          </div>
+          <div class="refill-item">
+            <div class="refill-item-img">💪</div>
+            <div class="refill-item-info">
+              <div class="refill-item-name">RiteBite Protein Bar</div>
+              <div class="refill-item-detail">Pack of 6 · Every 14 days</div>
+              <div class="refill-urgency urgency-red">🔴 Due 2 days ago</div>
+            </div>
+            <div class="refill-add">ADD</div>
+          </div>
+          <div class="refill-section-title">🕐 Due soon</div>
+          <div class="refill-item">
+            <div class="refill-item-img">🧴</div>
+            <div class="refill-item-info">
+              <div class="refill-item-name">Vim Dish Wash Gel</div>
+              <div class="refill-item-detail">500ml · Every 21 days</div>
+              <div class="refill-urgency urgency-orange">🟡 Due in 2 days</div>
+            </div>
+            <div class="refill-add">ADD</div>
+          </div>
+          <div class="refill-item">
+            <div class="refill-item-img">☕</div>
+            <div class="refill-item-info">
+              <div class="refill-item-name">Blue Tokai Coffee</div>
+              <div class="refill-item-detail">250g · Every 30 days</div>
+              <div class="refill-urgency urgency-orange">🟡 Due in 5 days</div>
+            </div>
+            <div class="refill-add">ADD</div>
+          </div>
+          <div class="refill-section-title">✅ Stocked up</div>
+          <div class="refill-item">
+            <div class="refill-item-img">🥚</div>
+            <div class="refill-item-info">
+              <div class="refill-item-name">Farm Fresh Eggs</div>
+              <div class="refill-item-detail">6 pcs · Every 7 days</div>
+              <div class="refill-urgency urgency-green">🟢 Ordered 2 days ago</div>
+            </div>
+            <div style="font-size:10px; color:#bbb; flex-shrink:0;">Stocked</div>
+          </div>
+          <div class="refill-all-btn" onclick="goTo(4)">
+            ⚡ Refill all 3 running low · ₹347
+          </div>
+          <div style="height:12px;"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="bottom-nav-item" onclick="goTo(1)"><span class="nav-icon">🏠</span>Home</div>
+          <div class="bottom-nav-item active"><span class="nav-icon">🔄</span>Refill</div>
+          <div class="bottom-nav-item"><span class="nav-icon">📦</span>Orders</div>
+          <div class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</div>
+        </div>
+      </div>
+
+      <!-- SCREEN 4: CHECKOUT -->
+      <div class="screen" id="screen-4">
+        <div class="checkout-header">
+          <div class="checkout-back-row" onclick="goTo(3)">
+            <span>←</span>
+            <span class="checkout-title">Your Refill Cart</span>
+          </div>
+          <div class="checkout-sub">3 items · Delivering to Hauz Khas</div>
+        </div>
+        <div class="scroll-content">
+          <div class="checkout-item">
+            <div class="checkout-item-img">🥛</div>
+            <div>
+              <div class="checkout-item-name">Oatly Oat Milk</div>
+              <div class="checkout-item-weight">1 Litre</div>
+            </div>
+            <div class="qty-ctrl" style="margin-left:auto;">
+              <span class="qty-btn">−</span>
+              <span class="qty-num">1</span>
+              <span class="qty-btn">+</span>
+            </div>
+            <div class="checkout-item-price">₹149</div>
+          </div>
+          <div class="checkout-item">
+            <div class="checkout-item-img">💪</div>
+            <div>
+              <div class="checkout-item-name">RiteBite Protein Bar</div>
+              <div class="checkout-item-weight">Pack of 6</div>
+            </div>
+            <div class="qty-ctrl" style="margin-left:auto;">
+              <span class="qty-btn">−</span>
+              <span class="qty-num">1</span>
+              <span class="qty-btn">+</span>
+            </div>
+            <div class="checkout-item-price">₹149</div>
+          </div>
+          <div class="checkout-item">
+            <div class="checkout-item-img">🧴</div>
+            <div>
+              <div class="checkout-item-name">Vim Dish Wash Gel</div>
+              <div class="checkout-item-weight">500ml</div>
+            </div>
+            <div class="qty-ctrl" style="margin-left:auto;">
+              <span class="qty-btn">−</span>
+              <span class="qty-num">1</span>
+              <span class="qty-btn">+</span>
+            </div>
+            <div class="checkout-item-price">₹49</div>
+          </div>
+          <div class="checkout-divider">
+            <div class="checkout-row"><span>Item total</span><span>₹347</span></div>
+            <div class="checkout-row"><span>Delivery</span><span class="savings">FREE (Prime)</span></div>
+            <div class="checkout-row"><span>Handling fee</span><span>₹2</span></div>
+            <div class="checkout-row total"><span>Total</span><span>₹349</span></div>
+          </div>
+          <div class="delivery-row">
+            ⚡ Delivery in <strong>9 minutes</strong>
+          </div>
+          <div class="place-order-btn" onclick="goTo(5)">
+            Place Order · ₹349
+          </div>
+          <div style="height:8px;"></div>
+        </div>
+      </div>
+
+      <!-- SCREEN 5: SUCCESS -->
+      <div class="screen success-screen" id="screen-5">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center;">
+          <div class="success-circle">✅</div>
+          <div class="success-title">Order placed!</div>
+          <div class="success-sub">Your Refill is on its way.<br>We'll remind you again in ~9 days.</div>
+          <div class="success-eta">
+            <div class="success-eta-num">9</div>
+            <div class="success-eta-label">MINUTES AWAY</div>
+          </div>
+          <div class="success-items">
+            <div class="success-item">🥛<span>Oat milk</span></div>
+            <div class="success-item">💪<span>Protein</span></div>
+            <div class="success-item">🧴<span>Dish soap</span></div>
+          </div>
+          <div class="track-btn" onclick="goTo(1)">Back to Home</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="step-dots">
+    <div class="step-dot active" onclick="goTo(1)" id="dot-1"></div>
+    <div class="step-dot" onclick="goTo(2)" id="dot-2"></div>
+    <div class="step-dot" onclick="goTo(3)" id="dot-3"></div>
+    <div class="step-dot" onclick="goTo(4)" id="dot-4"></div>
+    <div class="step-dot" onclick="goTo(5)" id="dot-5"></div>
+  </div>
+
+  <div class="screen-label" id="screen-label">Home — Refill entry point</div>
+  <div class="hint">tap the green elements to move through the flow</div>
+  <div class="byline">Feature concept by <span>Hansika Bansal</span></div>
+</div>
+
+<script>
+  const labels = [
+    '',
+    'Home — Refill entry point',
+    'Notification — predictive push',
+    'Refill tab — urgency tiers',
+    'Checkout — pre-filled cart',
+    'Success — loop closes'
+  ];
+
+  function goTo(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+    document.getElementById('screen-' + n).classList.add('active');
+    document.getElementById('dot-' + n).classList.add('active');
+    document.getElementById('screen-label').textContent = labels[n];
+  }
+</script>
+</body>
+</html>
